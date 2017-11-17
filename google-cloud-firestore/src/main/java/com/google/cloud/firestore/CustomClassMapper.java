@@ -21,6 +21,7 @@ import com.google.cloud.firestore.annotation.IgnoreExtraProperties;
 import com.google.cloud.firestore.annotation.PropertyName;
 import com.google.cloud.firestore.annotation.ServerTimestamp;
 import com.google.cloud.firestore.annotation.ThrowOnExtraProperties;
+
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -32,6 +33,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -144,7 +147,17 @@ class CustomClassMapper {
         || o instanceof Blob
         || o instanceof DocumentReference) {
       return o;
-    } else {
+    } else if (o instanceof LocalDate) {
+      return ((LocalDate)o).format(DateTimeFormatter.ISO_LOCAL_DATE);
+    } else if (o instanceof LocalTime) {
+      return ((LocalTime)o).format(DateTimeFormatter.ISO_LOCAL_TIME);
+    } else if (o instanceof ZonedDateTime) {
+      return ((ZonedDateTime)o).format(DateTimeFormatter.ISO_INSTANT);
+    } else if (o instanceof LocalDateTime) {
+      return ((LocalDateTime)o).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+    }else if (o instanceof Duration) {
+      return ((Duration)o).toString();
+    }  else {
       Class<T> clazz = (Class<T>) o.getClass();
       BeanMapper<T> mapper = loadOrCreateBeanMapperForClass(clazz);
       return mapper.serialize(o);
